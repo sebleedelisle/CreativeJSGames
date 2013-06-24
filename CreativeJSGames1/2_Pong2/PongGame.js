@@ -4,7 +4,7 @@
 var score1 = 0, 
 	score2 = 0,
 	playerPaddle, 
-	player2, 
+	aiPaddle, 
 	arena, 
 	ball, 
 	screenWidth, 
