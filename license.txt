@@ -1,0 +1,7 @@
+All materials are Copyright Ⓒ 2009-2013 Seb Lee-Delisle.
+All Rights Reserved.
+
+You may use the source code in the projects in your own projects but please do not copy or distribute the whole set of course materials. Please also do not copy or distribute the workshop slides.
+
+If you would like to use these materials to teach your own courses, please get in touch with Seb Lee-Delisle at seb@seb.ly for licensing options.
+
