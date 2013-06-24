@@ -33,7 +33,8 @@ function draw() {
 	 
 	checkCollisions(); 
 
-	playerShip.render(ctx); 
+	// draw ship... 
+	
 	renderInvaders(); 
 	renderBullets(); 
 	
@@ -66,17 +67,7 @@ function startGame() {
 }
 
 function updateBullets(){
-	for(var i = 0 ; i<bullets.length; i++) { 
-		var b = bullets[i]; 
-		b.update(); 
-		if(b.pos.y<0) {
-			bullets.splice(i,1); 
-			i--; 
-		}
 
-		
-	}
-	
 	// var i = bullets.length; 
 	// 	while(i-->0) { 
 	// 		var b = bullets[i]; 
@@ -85,9 +76,7 @@ function updateBullets(){
 	// 			bullets.splice(i,1); 
 	// 		}
 	// 	}
-	
-	
-	
+		
 }
 
 
@@ -102,8 +91,6 @@ function renderInvaders() {
 }
 
 function resetInvaders() { 
-
-	invaders = []; 
 
 }
 

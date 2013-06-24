@@ -96,22 +96,8 @@ function updateBullets(){
 		if(b.pos.y<0) {
 			bullets.splice(i,1); 
 			i--; 
-		}
-
-		
+		}	
 	}
-	
-	// var i = bullets.length; 
-	// 	while(i-->0) { 
-	// 		var b = bullets[i]; 
-	// 		b.update(); 
-	// 		if(b.pos.y<0) {
-	// 			bullets.splice(i,1); 
-	// 		}
-	// 	}
-	
-	
-	
 }
 
 
