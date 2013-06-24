@@ -62,7 +62,7 @@ function checkCollisions() {
 	// We're checking every asteroid with every bullet
 	// outside loop iterates through the asteroids, 
 	// inner loop iterates through bullets
-
+	
 	for (var i = 0; i<asteroids.length; i++) { 
 	
 		var asteroid = asteroids[i]; 
@@ -78,37 +78,6 @@ function checkCollisions() {
 			// we have a collision
 
 			// CHECK HERE BETWEEN BULLET AND ASTEROID
-
-			// var dx = asteroid.pos.x - bullet.pos.x; 
-			// var dy = asteroid.pos.y - bullet.pos.y;
-			// 
-			// var distanceSquared = ((dx*dx) + (dy*dy)); 
-			// 
-			// if(distanceSquared < asteroid.radius*asteroid.radius) { 
-				
-			if(asteroid.pos.isCloseTo(bullet.pos, asteroid.radius)){
-				
-				if(asteroid.radius<20) { 
-				 	asteroids.splice(i,1); 
-				 	i--; 
-				} else { 
-					asteroid.radius/=2; 
-					var newasteroid = new Asteroid(0, 0, asteroid.radius); 				
-					newasteroid.pos.copyFrom(asteroid.pos); 
-					newasteroid.vel.copyFrom(asteroid.vel);
-					asteroid.vel.rotate(-20); 
-					newasteroid.vel.rotate(20); 
-					
-					
-					asteroids.push(newasteroid);
-					
-				}
-				
-				bullets.splice(j,1); 
-				j--;
-				break;
-				
-			} 
 
 
 		}
@@ -251,6 +220,7 @@ function PlayerShip() {
 	
 	
 	this.render = function(c) { 
+		c.fillStyle = 'white';
 		
 		c.save(); 
 
@@ -303,17 +273,7 @@ function PlayerShip() {
 function Asteroid(x,y,r)  {
 
 	var pos = this.pos = new Vector2(x,y); 
-	var vel = this.vel = new Vector2(3,0);
-	vel.rotate(random(360));
-	
-	// var speed = 3; 
-	// var angle = radians(random(360)); 
-	// 
-	// vel.x = Math.cos(angle) * speed;  
-	// vel.y = Math.sin(angle) * speed;  
-	
-	
-	
+	var vel = this.vel = new Vector2(random(-4,4),random(-4,4)); 
 	
 	this.radius = r; 
 	
@@ -338,13 +298,6 @@ function Bullet(x, y, direction) {
 	// create a velocity vector that is moving to the right
 	var vel = this.vel = new Vector2(8,0);
 	// and rotate it by the specified amount to point it in the right direction
-	vel.rotate(direction);
-	
-	
-	// var speed = 8; 
-	// vel.x = Math.cos(radians(direction)) * speed; 
-	// vel.y = Math.sin(radians(direction)) * speed; 
-	
 	
 	
 	// life gets incremented every update, so we can tell how old it is

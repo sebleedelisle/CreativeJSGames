@@ -1,9 +1,7 @@
 
 // game variables
 
-var playerShip, 
-	invaders, 
-	bullets,
+var 
 	
 	screenWidth, 
 	screenHeight;
@@ -43,37 +41,10 @@ function draw() {
 
 function checkKeys() { 
 	
-	if(KeyTracker.isKeyDown(Key.LEFT)) { 
-		playerShip.goLeft();
-	}
-	if(KeyTracker.isKeyDown(Key.RIGHT)) { 
-		playerShip.goRight();
-	}
 }
 
 function checkCollisions() { 
-	
-	for(var i = 0; i<invaders.length; i++) { 
-		var invader = invaders[i]; 
-		
-		for(var j = 0; j<bullets.length; j++) { 
-			var bullet = bullets[j]; 
-			
-			// bullet and invader
-			if(rectRectPenetrationTest(invader, bullet)) { 
-				
-				invaders.splice(i, 1); 
-				i--; 
-				
-				bullets.splice(j,1); 
-				j--; 
-				
-				break;
-			}
-			
-		}
-		
-	}
+
 
 }
 
@@ -125,33 +96,14 @@ function updateInvaders() {
 }
 
 function renderBullets() { 
-	
-	for(var i =0; i<bullets.length; i++) { 
-		bullets[i].render(ctx); 
-		
-	}
 }
 
 function renderInvaders() { 
-	
-	for(var i =0; i<invaders.length; i++) { 
-		invaders[i].render(ctx); 
-		
-		
-	}
-	
 }
 
 function resetInvaders() { 
 
 	invaders = []; 
-	
-	for(var x = 0; x < 12; x ++ ) { 
-		for(var y = 0; y < 8; y++ ) { 
-	
-			invaders.push(new Invader(x*70,y*50)); 
-		}
-	}
 
 }
 
@@ -172,10 +124,6 @@ function initCanvas() {
 
 function initObjects() { 
 	
-	playerShip = new PlayerShip(); 
-	invaders = []; 
-	bullets = []; 
-	
 }
 
 function initListeners() { 
@@ -186,8 +134,7 @@ function initListeners() {
 }
 
 function firePressed() { 
-	var bullet = new Bullet(playerShip.pos.x + playerShip.width/2, playerShip.pos.y); 
-	bullets.push(bullet); 
+
 
 }
 
