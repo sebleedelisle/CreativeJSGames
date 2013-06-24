@@ -1,0 +1,120 @@
+<!DOCTYPE HTML>
+<html lang="en"> 
+<meta charset="utf-8"> 
+	<head>
+	<title>Framework example</title>
+	<style type="text/css"> 
+		body { 
+			background-color:black; 
+			margin:0px; 
+			overflow : hidden; 
+			color:white;
+			font-family: Helvetica, Arial, Sans-Serif;
+		}
+		</style> 
+	</head>
+
+	
+	<body>
+	<script src="../libs/creativejs.js"></script>
+	<script src="../libs/Vector2.js"></script>	
+	<script src="../libs/KeyTracker.js"></script>
+	<script src="SceneManager.js"></script>
+<script>
+
+var canvas, 
+	ctx; 
+
+
+var sceneManager = new SceneManager(); 
+
+
+var openingScene = new TitleScene("INTRO", "Press space to start"); 
+var gameScene = new TitleScene("GAME", "Press space for game over"); 
+var gameOverScene = new TitleScene("GAME OVER", "Press space to start again"); 
+
+openingScene.nextScene = gameScene; 
+gameScene.nextScene = gameOverScene; 
+gameOverScene.nextScene = openingScene; 
+
+
+
+
+function setup() { 
+	initVars();
+	initCanvas(); 	
+	
+	sceneManager.gotoScene(openingScene); 
+
+	KeyTracker.addKeyDownListener(Key.SPACE, spacePressed); 
+
+}
+
+function draw() { 
+	ctx.clearRect(0,0,screenWidth, screenHeight); 
+	sceneManager.render(ctx); 
+}
+	
+	
+function initVars() { 
+	screenWidth = window.innerWidth; 
+	screenHeight = window.innerHeight; 	
+}
+
+function initCanvas() { 
+
+	canvas = document.createElement('canvas'); 
+	ctx = canvas.getContext('2d'); 
+
+	document.body.appendChild(canvas); 
+	canvas.width = screenWidth; 
+	canvas.height = screenHeight;
+}
+
+function spacePressed() { 
+	if((sceneManager.currentScene) && (typeof(sceneManager.currentScene.goNext)=='function')){
+		sceneManager.currentScene.goNext();
+	}
+}
+
+	
+	
+// ------------- OPENING SCENE -------------------
+
+function TitleScene(title, subtitle) { 
+		
+	this.title = title;
+	this.subtitle = subtitle; 
+	
+	this.nextScene = undefined; 
+	
+	this.start = function() { 
+	};
+	
+	this.stop = function() {
+	};
+	
+	this.render = function(ctx) { 
+
+		ctx.font ="24pt Arial"; 
+		ctx.textAlign = 'center';
+		ctx.fillStyle ="white"; 
+		ctx.fillText(this.title, screenWidth/2,250);
+		ctx.font ="18pt Arial"; 
+		ctx.fillText(this.subtitle, screenWidth/2,300); 	
+	}
+	
+	this.goNext = function() { 
+		if(typeof(this.nextScene)!='undefined') { 
+			sceneManager.gotoScene(this.nextScene); 
+		}
+		
+	}
+
+}	
+	
+</script> 
+
+	</body>
+</html>
+	

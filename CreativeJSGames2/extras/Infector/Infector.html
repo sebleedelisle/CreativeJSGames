@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Plugin Media :: INFECTOR! HTML5 Game proof of concept</title>
+
+		<style type="text/css">
+			#container {
+				position: relative;
+				overflow : hidden;
+				margin:0px; 
+				padding:0px;
+			}
+			canvas {
+				background: url(img/background.png);
+				-webkit-transform : translateZ(0px);
+			}
+			body{
+				margin: 0 ;
+				padding: 0 ;
+				background-color: #222233; 
+				color: #666666; 
+				line-height: 1.5 ;
+				font-family: Helvetica, Tahoma, Verdana; 
+				font-size: 12px;
+				-webkit-transform : translateZ(0px); 
+			}
+			div{
+				-webkit-transform : translateZ(0px);
+			}
+
+			img.logo{
+				position: absolute;
+				right : 10px;
+				top: 10px ;				
+			}
+			
+			img.button {
+				position:absolute;
+				width:120px; 
+				height:120px;
+			
+			}
+			
+			#sharing {background-color: #9999aa;position: absolute; top: 0;left: 0;margin: 5px;padding: 7px 0 4px 10px;z-index: 98;border: 1px solid black;}
+			
+		</style>
+		
+	</head>
+	
+	<body onload="init();">
+	
+		<!-- SCRIPT IMPORTS -->
+		<script src="js/Vector2.js"></script>	
+		<script src="js/Animation.js"></script>
+		<script src="js/Door.js"></script>
+		<script src="js/Edge.js"></script>	
+		<script src="js/MovingEdge.js"></script>
+		<script src="js/Player.js"></script>
+		<script src="js/Ladder.js"></script>
+		<script src="js/PickUp.js"></script>
+		<script src="js/Enemy.js"></script>
+				
+		<!-- SCRIPT BODY -->
+		<script>
+
+			// game setting vars
+			var fps = 30,
+				playerJumpVel = 8,
+				playerClimbVel = 7,
+				mainInterval,
+				
+			// screen size vars
+				SCREEN_WIDTH = 640,
+				SCREEN_HEIGHT = 480,
+				HALF_WIDTH = SCREEN_WIDTH / 2,
+				HALF_HEIGHT = SCREEN_HEIGHT / 2,
+				
+				// mouse variables
+				mouseX = HALF_WIDTH, 
+				mouseY = HALF_HEIGHT,
+		
+			// display surface vars
+				canvas = document.createElement( 'canvas' ),
+				context = canvas.getContext( '2d' ),
+				
+			// game element vars
+				edges = [], 
+				ladders = [],
+				doors = [],
+				pickUps = [],
+				movingEdges = [],
+				enemies = [],
+				player, 
+				
+			// input vars
+				leftDown, rightDown, upDown, downDown, spaceDown, 
+				           
+			// preload image resources
+                assetImages = {};
+
+                var ladderImage = assetImages['ladder'] = new Image();
+                assetImages['ladder'].src = 'img/ladder.png';
+
+				var edgeImage = assetImages['staticEdge'] = new Image();
+                assetImages['staticEdge'].src = 'img/Platforms.png';
+
+				var doorImage = assetImages['door'] = new Image();
+                assetImages['door'].src = 'img/exitcomp.png';
+
+				var playerRun = assetImages['playerRun'] = new Image();
+                assetImages['playerRun'].src = 'img/BUG_RUN.png';
+
+				var playerJump = assetImages['playerJump'] = new Image();
+                assetImages['playerJump'].src = 'img/BUG_JUMP.png';
+
+				var playerIdle = assetImages['playerIdle'] = new Image();
+                assetImages['playerIdle'].src = 'img/BUG_IDLE.png';
+
+				var playerClimb = assetImages['playerClimb'] = new Image();
+                assetImages['playerClimb'].src = 'img/BUGG_CLIMBING.png';
+
+				var enemyWalk = assetImages['enemyWalk'] = new Image();
+                assetImages['enemyWalk'].src = 'img/baddie_sprite_sheet.png';
+
+				var pickupIdle1 = assetImages['pickupIdle1'] = new Image();
+                assetImages['pickupIdle1'].src = 'img/pickup1_sprite_sheet.png';
+				
+				var pickupIdle2 = assetImages['pickupIdle2'] = new Image();
+                assetImages['pickupIdle2'].src = 'img/pickup2_sprite_sheet.png';
+
+			
+			function random( min, max ) {
+				return ( (Math.random()*(max-min)) + min ) ;
+			}
+			
+			function init() {
+
+				// CANVAS SET UP
+				container = document.createElement( 'div' );
+				container.id = "container";
+				container.style.width = SCREEN_WIDTH+'px';
+				container.style.height = SCREEN_HEIGHT+'px';
+				
+				container.style.textAlign = 'center' ;
+				container.style.margin = 'auto' ;
+				container.style.marginTop = '10px' ;
+				container.style.border = '5px solid black' ;
+				
+				document.body.appendChild( container );
+
+				container.appendChild(canvas); 
+				canvas.width = SCREEN_WIDTH; 
+				canvas.height = SCREEN_HEIGHT;
+				
+				initListeners(); 
+				
+				// LEVEL SETUP
+				edges.push( new Edge( 0, SCREEN_HEIGHT-1, SCREEN_WIDTH, edgeImage) ) ; // floor
+				
+				// static platforms
+				edges.push(new Edge( 119, 82, 234,edgeImage )); 
+				edges.push(new Edge( 393, 82, 247, edgeImage ));
+				edges.push(new Edge( 0, 178, 282, edgeImage ));
+				edges.push(new Edge( 390, 178, 249,edgeImage ));
+				edges.push(new Edge( 0, 273, 61,edgeImage ));
+				edges.push(new Edge( 231, 273, 251,edgeImage ));
+				edges.push(new Edge( 516, 273, 124,edgeImage ));
+				edges.push(new Edge( 0, 367, 60,edgeImage ));
+				edges.push(new Edge( 109, 370, 115,edgeImage ));
+				edges.push(new Edge( 255, 370, 99,edgeImage ));
+				edges.push(new Edge( 384, 370, 97,edgeImage ));
+				edges.push(new Edge( 581, 370, 59,edgeImage ));
+				
+				// moving platforms
+				movingEdges.push( new MovingEdge( 135, 273, 60, 60, 1, edgeImage ) ) ;
+				for(var j = 0; j<movingEdges.length; j++){
+					var medge = movingEdges[j]; 
+					container.appendChild(medge.domElement); 
+
+				}		
+				// ladders
+				ladders.push( new Ladder( 62, 185, 287, ladderImage ) );
+				ladders.push( new Ladder( 124, 89, 99, ladderImage ) );
+				ladders.push( new Ladder( 283, 90, 190, ladderImage ) );
+				ladders.push( new Ladder( 283, 376, 95, ladderImage ) );
+				ladders.push( new Ladder( 410, 184, 95, ladderImage ) );
+				ladders.push( new Ladder( 540, 88, 97, ladderImage ) );
+				ladders.push( new Ladder( 525, 280, 193, ladderImage ) );
+				
+				// exit door
+				doors.push( new Door( 20, 60, doorImage, true, false ) );
+				for( var i = 0 ; i < doors.length ; i++ ){
+					door = doors[i];
+					container.appendChild(door.domElement);
+				}
+				
+				// player character
+				player = new Player( 398, 375, playerRun, playerJump, playerIdle, playerClimb ) ; 
+				container.appendChild( player.domElement ) ;
+				
+				// pickups
+				reSpawnPickups( 5 ) ;				
+				pickupsCollected = 0;
+				totalPickups = pickUps.length;
+				
+				// enemy characters
+				var enemy = new Enemy( enemyWalk ) ;
+				enemy.registerNavNode( new Vector2( 74, 180 ) ) ;
+				enemy.registerNavNode( new Vector2( 74, 474) ) ;
+				enemy.registerNavNode( new Vector2( 290, 474) ) ;
+				enemy.registerNavNode( new Vector2( 290, 374) ) ;
+				enemies.push( enemy ) ;				
+				container.appendChild(enemy.domElement);
+				
+				var enemy2 = new Enemy( enemyWalk ) ;
+				enemy2.registerNavNode( new Vector2( 135, 158 ) ) ;
+				enemy2.registerNavNode( new Vector2( 135, 74 ) ) ;
+				enemy2.registerNavNode( new Vector2( 290, 74 ) ) ;
+				enemy2.registerNavNode( new Vector2( 290, 264 ) ) ;
+				enemies.push( enemy2 ) ;
+				container.appendChild(enemy2.domElement);
+				
+				var enemy3 = new Enemy( enemyWalk ) ;
+				enemy3.registerNavNode( new Vector2( 338, 270 ) ) ;
+				enemy3.registerNavNode( new Vector2( 420, 270 ) ) ;
+				enemy3.registerNavNode( new Vector2( 420, 172 ) ) ;
+				enemy3.registerNavNode( new Vector2( 552, 172 ) ) ;
+				enemy3.registerNavNode( new Vector2( 552, 77 ) ) ;
+				enemy3.registerNavNode( new Vector2( 390, 77 ) ) ;
+				enemies.push( enemy3 ) ;
+				container.appendChild(enemy3.domElement);
+			
+				drawLevel(); 
+				
+				makeControls(); 
+				
+				//
+				startMainInterval() ;	
+			}
+
+			function reSpawnPickups( maxPickups ) {
+			
+				var pickUpPool = [] ;
+				if( pickUps.length > 0 ) pickUpPool = pickUps.concat() ;
+				pickUps = [] ;
+						
+				for( var i = 0 ; i < edges.length ; i ++ ) {
+					
+					if( pickUps.length >= maxPickups ) break ;
+					
+					if( Math.random() > 0.2 ) {
+						
+						var pickup ; 
+						var tx = random( edges[i].getLeft() + edges[i].width / 4 , edges[i].getRight() -  edges[i].width / 4 ) ;
+						var ty = edges[i].getTop() ;
+						if( pickUpPool.length > 0 ) 
+						{
+							pickup = pickUpPool.pop() ;
+							pickup.reset( tx, ty ) ;
+						}
+						else
+						{
+							pickup = new PickUp( pickupIdle2, tx, ty ) ;
+							container.appendChild(pickup.domElement);							
+						}
+						
+						pickUps.push( pickup ) ;
+						
+						pickup.render( context ) ;
+					}
+				}
+				
+			}
+
+			function mainLoop() {
+				
+				// moving edge update
+				for(var j = 0; j<movingEdges.length; j++){
+					var movingEdge = movingEdges[j]; 
+					if( movingEdge.pos.y < movingEdge.getLowerBounds()){
+						movingEdge.pos.y = movingEdge.getLowerBounds();
+						movingEdge.vel.y *= -1;
+					}
+					else if( movingEdge.pos.y > movingEdge.getUpperBounds()){
+						movingEdge.pos.y = movingEdge.getUpperBounds();
+						movingEdge.vel.y *= -1;
+					}
+					movingEdge.update();		
+					movingEdge.render(context); 	
+				}
+			
+				// pickup update
+				for(var i = 0; i< pickUps.length; i++){
+					var pickup = pickUps[i]; 
+					if( pickup.enabled ) pickup.render(context); 
+				}
+				
+				// enemy update
+				for( i = 0; i<enemies.length; i++){
+					var enemy = enemies[i]; 
+					enemy.update() ;
+					enemy.render(context); 
+				}
+				
+				// player update
+				player.update(); 
+				
+				if(player.pos.x < 0) player.pos.x = 0; 
+				else if(player.getRight()>SCREEN_WIDTH) player.pos.x = SCREEN_WIDTH-player.width; 
+				
+				if(player.pos.y < 0) player.pos.y = 0; 
+				else if(player.getBottom()>SCREEN_HEIGHT) player.pos.y = SCREEN_HEIGHT; 
+		
+				if(leftDown) player.moveLeft(); 
+				else if(rightDown) player.moveRight(); 
+				
+				if( isClass( player.connectedEdge, 'Ladder' ) ) {
+	 				
+					var ladder = player.connectedEdge;
+         
+	 				if(upDown) {
+	 					player.vel.y = -playerClimbVel;
+						player.pos.x += ((ladder.getCenterX() - player.width * 0.5) -player.pos.x) *0.1;
+	 				}
+	 				else if(downDown) {
+	 	
+						player.vel.y = playerClimbVel ;
+						player.pos.x += ((ladder.getCenterX() - player.width * 0.5) -player.pos.x) *0.1;
+	 				}
+	 				else
+	 				{
+	 					player.vel.y=0;
+	 				}
+	 			}
+				
+				// main player collision management
+				checkCollisions() ; 
+				
+				player.render(context) ;
+			}
+		
+			function drawLevel() {
+				
+				context.clearRect( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT ) ; 
+
+				// ladder update
+				for(var i = 0; i<ladders.length; i++){
+					var ladder = ladders[i]; 
+					ladder.render(context); 
+			  	}
+
+				// edge update
+				for(var i = 0; i<edges.length; i++){
+					var edge = edges[i]; 
+					edge.render(context);
+				} 
+
+				// door update
+				for(var i=0; i<doors.length; i++){
+					var door = doors[i];
+					door.render(context);
+				}
+
+			
+			
+			}
+		
+			function checkCollisions() {
+				
+				if(player.connectedEdge) {
+					var edge = player.connectedEdge; 
+					if((player.getLeft()>edge.getRight()) || (player.getRight()<edge.getLeft())) player.fall();
+                    else if( isClass(player.connectedEdge,'Ladder') && (player.getTop() > edge.getBottom()) || (player.getBottom() < edge.getTop() )) {
+						player.fall();
+					}				
+				}
+								
+				for( var i= 0 ; i<edges.length ; i++ ) {
+					var edge = edges[i]; 
+					if((player.pos.y > edge.getTop()) && (player.pos.y - player.vel.y < edge.getTop())) {
+						if((player.getLeft() < edge.getRight()) && (player.getRight()> edge.getLeft())) {
+							player.connectedEdge = edge; 
+							player.pos.y = edge.pos.y; 
+							player.vel.y = 0; 
+							player.land(); 
+							
+						}
+					}
+				}
+				
+				// moving platform update
+				for( var j = 0 ; j < movingEdges.length ; j++ ) {
+					var movingEdge = movingEdges[j]; 
+					if((player.pos.y > movingEdge.getTop()) && (player.pos.y - player.vel.y < movingEdge.getTop())) {
+						if((player.getLeft() < movingEdge.getRight()) && (player.getRight()> movingEdge.getLeft())) {
+							player.connectedEdge = movingEdge; 
+							player.pos.y = movingEdge.pos.y; 
+							player.vel.y = 0; 
+							player.land(0);
+							break; 
+						}
+					}	
+
+				}
+								
+				// ladder traversal
+				if( (upDown || downDown) && ( ! isClass( player.connectedEdge, 'Ladder' ) ) ) {
+					for( var i= 0 ; i < ladders.length ; i++ ) {
+						var ladder = ladders[i] ;					
+						if((player.getLeft() < ladder.getCenterX()) && (player.getRight() > ladder.getCenterX())) {
+							if((player.getTop() < ladder.getBottom()) && (player.getBottom() > ladder.getTop())) {
+								player.connectedEdge = ladder;
+								player.vel.y = 0; 
+	  							player.vel.x = 0;
+	  							player.pos.x = ladder.getCenterX() - player.width * 0.5;
+								player.climb(); 
+	  							break;
+							}
+						}
+					}
+				}
+				
+				// pickup collection and level completion check
+				for( var i = 0; i < pickUps.length ; i++ ) {
+					var pickup = pickUps[i];
+					if( pickup.enabled ){
+						if( checkHorizCollision( player , pickup ) ) {
+							if( checkVertCollision( player, pickup ) ) {
+								pickup.collect() ;
+								pickupsCollected++;
+								checkPickups();
+							}
+						}
+					}
+				}
+				
+				// doors
+				for( var i = 0; i < doors.length ; i++ ) {
+					var door = doors[i];
+					if( door.isEndDoor && door.enabled ){
+						if( checkHorizCollision( player, door ) ) {
+							if( checkVertCollision( player, door ) ) {
+								playerWin() ;	
+							}
+						}
+					}
+				}
+				
+				// enemies
+				for( var i = 0; i < enemies.length ; i++ ) {
+					var enemy = enemies[i];
+					if( checkHorizCollision( player, enemy ) ) {
+						if( checkVertCollision( player, enemy ) ) {
+							playerDie() ;
+						}
+					}
+				}
+				
+			}
+			
+			function checkVertCollision( obj1, obj2 ) {
+				if(((obj1.pos.y > obj2.getTop()) && (obj1.pos.y <= obj2.pos.y) ) || (( obj1.getTop() < obj2.pos.y) && ( obj1.getTop() > obj2.getTop() ))) return true ;
+				return false ;
+			}
+			
+			function checkHorizCollision( obj1, obj2 ) {
+				if((obj1.getLeft() < obj2.getRight()) && (obj1.getRight() > obj2.getLeft())) return true ;
+				return false ;
+			}			
+				
+			function initListeners() {
+				document.addEventListener( 'mousemove', onMouseMove, false );
+				document.addEventListener( 'mousedown', onMouseDown, false );
+				document.addEventListener( 'mouseup', onMouseUp, false );
+				
+				document.addEventListener( 'keydown', onKeyDown, false );
+				document.addEventListener( 'keyup', onKeyUp, false );
+			}
+
+
+			function makeControls() { 
+				
+				if(!('createTouch' in document)) return;
+				document.addEventListener( 'touchmove', function(e){e.preventDefault();}, false);
+				document.addEventListener( 'touchstart', function(e){e.preventDefault();}, false);
+				
+				var bottom = window.innerHeight;
+				document.body.style.height = bottom+"px";
+			//	document.body.style.display = 
+				
+				leftButton = new Image(); 
+				leftButton.src = "img/button.png"; 
+				leftButton.className = "button"; 
+				leftButton.style.top = (bottom-180) +"px"; 
+				
+				rightButton = new Image(); 
+				rightButton.src = "img/button.png"; 
+				rightButton.className = "button"; 
+				rightButton.style.top = (bottom-180) +"px"; 
+				rightButton.style.left = "120px"; 
+				
+				upButton = new Image(); 
+				upButton.src = "img/button.png"; 
+				upButton.className = "button"; 
+				upButton.style.top = (bottom-240)+"px";
+				upButton.style.left = "60px"; 
+			//	upButton.style.height = "60px"; 
+
+				downButton = new Image(); 
+				downButton.src = "img/button.png"; 
+				downButton.className = "button"; 
+				downButton.style.top = (bottom-120)+"px"; 
+				downButton.style.left = "60px"; 
+				
+				jumpButton = new Image(); 
+				jumpButton.src = "img/button.png"; 
+				jumpButton.className = "button"; 
+				jumpButton.style.top = (bottom-150)+"px"; 
+				jumpButton.style.left = (window.innerWidth-150)+"px"; 
+
+
+				document.body.appendChild(upButton); 
+				document.body.appendChild(downButton); 
+				
+				document.body.appendChild(leftButton); 
+				document.body.appendChild(rightButton); 
+				
+				document.body.appendChild(jumpButton); 
+					
+				leftButton.addEventListener('touchstart', function(e){leftDown=true;}, false); 
+				leftButton.addEventListener('touchend', function(e){leftDown=false;}, false); 
+				rightButton.addEventListener('touchstart', function(e){rightDown=true;}, false); 
+				rightButton.addEventListener('touchend', function(e){rightDown=false;}, false); 
+				upButton.addEventListener('touchstart', function(e){upDown=true;}, false); 
+				upButton.addEventListener('touchend', function(e){upDown=false;}, false); 
+				downButton.addEventListener('touchstart', function(e){downDown=true;}, false); 
+				downButton.addEventListener('touchend', function(e){downDown=false;}, false); 
+	
+				jumpButton.addEventListener('touchstart', function(e){	player.jump(); }, false);
+	
+				
+			}
+
+			function onMouseMove( event ) {
+				event.preventDefault();
+				mouseX = event.clientX;
+				mouseY = event.clientY;
+			}
+			
+			function onMouseDown(event) {
+				//
+			}
+			
+			function onMouseUp(event) {
+				//
+			}
+			
+			function onKeyDown(e) {	
+				if(e.keyCode == 38) upDown = true; 
+				else if(e.keyCode == 40) downDown = true; 
+				else if(e.keyCode == 37) leftDown = true; 
+				else if (e.keyCode == 39) rightDown = true; 
+				else if (e.keyCode == 32) {
+					player.jump(); 
+					spaceDown = true;
+				}
+			}
+			
+			function onKeyUp(e) {
+				if(e.keyCode == 38) upDown = false; 
+				else if(e.keyCode == 40) downDown = false; 
+				else if(e.keyCode == 37) leftDown = false; 
+				else if (e.keyCode == 39) rightDown = false;
+				else if (e.keyCode == 32) spaceDown = false;
+			}
+
+  			function isClass( obj, className ) {
+				if( ! obj ) return false ;
+				classFound = obj.constructor.toString().match(/function ([a-z]+)/i).pop() ;
+				return classFound == className;
+			}
+			
+			function checkPickups() {
+				if( totalPickups == pickupsCollected ) 
+				{
+					openEndDoors() ;
+					//restartGame() ;
+				}
+			}
+			
+			function playerDie() {
+				
+			//	alert( 'Player dies!' ) ;
+				
+				restartGame() ;
+			}
+			
+			function playerWin() {
+			//	alert( 'Player wins!' ) ;
+
+				restartGame() ;	
+			}
+			
+			function openEndDoors() {
+				for(var i = 0; i < doors.length ;i++ ) {
+					var door = doors[i] ;
+					if( door.isEndDoor ) door.enable();
+				}
+			}
+			
+			function restartGame() {
+				
+				stopMainInterval() ;
+				
+				upDown = false; 
+				downDown = false; 
+				leftDown = false; 
+				rightDown = false;
+				spaceDown = false;
+					
+				// reset pickups
+				reSpawnPickups( 5 ) ;
+				
+				// reset baddies
+				for( i = 0; i<enemies.length; i++){
+					var enemy = enemies[i]; 
+					enemy.reset() ;
+					enemy.render(context); 
+				}
+				
+				// reset player
+				player.reset() ;
+				player.render( context ) ;
+				
+				// reset doors
+				for(var i = 0; i < doors.length ;i++ ) {
+					var door = doors[i] ;
+					door.reset() ;
+				}
+				
+				pickupsCollected = 0 ;
+				
+				startMainInterval() ;
+				
+			}
+			
+			function startMainInterval() {
+				mainInterval = setInterval( mainLoop, 1000 / fps ) ;
+			}
+			
+			function stopMainInterval() {
+				clearInterval( mainInterval ) ;
+			}
+
+		</script>
+		<div id="sharing">
+<iframe src="http://www.facebook.com/plugins/like.php?href=http%3A%2F%2Fclients.pluginmedia.net%2Fdev%2Finfector%2F&amp;layout=standard&amp;show_faces=false&amp;width=200&amp;action=like&amp;font&amp;colorscheme=light&amp;height=35" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:200px; height:35px;" allowTransparency="true"></iframe>
+		
+			<div id="retweet_button"> 
+				<a href="http://twitter.com/share" class="twitter-share-button" data-url="http://clients.pluginmedia.net/dev/infector/" data-text="Infector! A cute HTML5 platform game hacked together in one day at @pluginmedia with @seb_ly #creativejs" data-count="horizontal" data-related="seb_ly">Tweet</a> 
+				<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script> 
+			</div>
+		</div>	
+		<img src="logo.png" class="logo"> 
+		
+	</body>
+</html>

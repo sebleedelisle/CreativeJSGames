@@ -1,0 +1,68 @@
+function Edge(x, y, w, edgeImage)
+{
+	var pos = this.pos = new Vector2(x, y);
+	
+	var img = edgeImage ;
+
+	this.width = w; 
+	this.getLeft = function(){
+		return this.pos.x; 
+	
+	};
+
+	this.getRight = function(){
+		return this.pos.x+this.width; 
+		
+	};
+
+
+
+	this.getTop = function(){
+		return this.pos.y; 
+		
+	};
+
+
+
+	this.render = function(c){
+		
+		
+		c.save(); 
+		
+		c.strokeStyle = "white"; 
+		c.lineWidth = 6; 
+		c.beginPath(); 
+		c.moveTo(pos.x, pos.y); 
+		c.lineTo(pos.x+this.width, pos.y); 
+		c.stroke(); 
+		
+		//img.width = this.width ;
+		//c.drawImage(img,pos.x,pos.y);
+		//c.drawImage(img , sx , sy , sw , sh , dx , dy , dw , dh )
+		
+		//var currentTileTotal = 0 ;
+		
+		
+		if( this.width < img.width ){
+		
+			//console.log( 'img.width=' , img.width , ' this.width' ,  this.width ) ;
+			c.drawImage( img , 0 , 0 , this.width ) ;
+		
+		}
+		
+		
+		c.restore(); 
+		
+		
+	};
+
+
+
+
+
+
+
+
+
+
+}
