@@ -9,7 +9,7 @@ spriteImage.src = "Runner.png";
 var canvas, 
 	ctx,
 	screenWidth, 
-	screenHeight;; 
+	screenHeight;
 
 	
 function setup(){
@@ -25,40 +25,37 @@ function setup(){
 function draw() { 
 
 	ctx.clearRect(0,0,canvas.width, canvas.height); 
-	//checkKeys(); 
+	checkKeys(); 
 	sprite.update(); 
+
+	if(sprite.x<0) sprite.x = screenWidth;  
+	else if(sprite.x>screenWidth) sprite.x = 0;  
+	if(sprite.y<0) sprite.y = screenHeight;  
+	else if(sprite.y>screenHeight) sprite.y = 0;  
+
 	
-	// with(sprite) { 
-	// 	if(pos.x<0) pos.x = screenWidth;  
-	// 	else if(pos.x>screenWidth) pos.x = 0;  
-	// 	if(pos.y<0) pos.y = screenHeight;  
-	// 	else if(pos.y>screenHeight) pos.y = 0;  
-	// }
-	ctx.save(); 
-	ctx.translate(200,200); 
-	//ctx.rotate(radians(180));
-	ctx.scale(-1,1);
+	// ctx.scale(-1,1);
 	sprite.render(ctx); 
 	
-	ctx.restore(); 
-	/ctx.drawImage(spriteImage, 800,0,60,89,0,30,60,89);
+	//ctx.drawImage(spriteImage, 0,0);
+//	console.log('hello?');
 	
 }	
 
 function checkKeys() { 
-	// if(KeyTracker.isKeyDown(Key.LEFT)) {
-	// 	sprite.goLeft(); 
-	// }
-	// 
-	// if(KeyTracker.isKeyDown(Key.RIGHT)) {
-	// 	racer.steer(1); 
-	// }
-	// if(KeyTracker.isKeyDown(Key.UP)) { 
-	// 	racer.accelerate(1); 
-	// }
-	// if(KeyTracker.isKeyDown(Key.DOWN)) { 
-	// 	racer.accelerate(-1); 
-	// }
+	if(KeyTracker.isKeyDown(Key.LEFT)) {
+		sprite.x-=10; 
+		sprite.play();
+		sprite.scaleX = -Math.abs(sprite.scaleX); 
+	}
+	else if(KeyTracker.isKeyDown(Key.RIGHT)) {
+		sprite.x+=10;  
+		sprite.scaleX = Math.abs(sprite.scaleX); 
+		sprite.play();
+	} else { 
+		sprite.stop(); 
+	}
+
 	
 }
 

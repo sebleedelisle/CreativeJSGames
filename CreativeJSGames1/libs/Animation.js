@@ -41,12 +41,12 @@ function Animation(img, w, h, numFrames) {
 				}
 			}
 			else this.gotoAndStop( nextFrame ) ;			
-			
+
 		}
 	};
 	
 	this.play = function () {
-		this.playing = true; 
+		playing = true; 
 	};
 	
 	this.render = function(ctx) {
@@ -56,13 +56,13 @@ function Animation(img, w, h, numFrames) {
 		ctx.translate(this.x, this.y); 
 		ctx.scale(this.scaleX, this.scaleY); 
 
-		ctx.drawImage(img, frameOffsetX, 0, this.width, this.height, -w/2, 0, this.width, this.height ); 
-		
+		ctx.drawImage(img, frameOffsetX, 0, this.width, this.height, this.x, this.y, this.width, this.height ); 
 		ctx.restore();
+		
 	};
 
-	this.stop = function(){
-		this.playing = false; 
+	this.play = function(){
+		this.playing = true; 
 	};
 	
 }

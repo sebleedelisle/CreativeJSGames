@@ -1,10 +1,11 @@
 
 var screenWidth, 
-	screenHeight,
-	canvas, 
-	ctx; 
+	screenHeight;
 
-// set up automatically called on load by creative.js
+var canvas, 
+	ctx; 
+	
+	
 function setup(){
 	initVars(); 
 	initCanvas(); 
@@ -13,17 +14,13 @@ function setup(){
 }
 
 // MAIN GAME LOOP
-// draw automatically called by creative.js
+
 function draw() { 
 
 	ctx.clearRect(0,0,canvas.width, canvas.height); 
-	
+
 }	
 
-
-function initObjects() { 
-
-}
 
 function initVars() { 
 	screenWidth = window.innerWidth; 
@@ -38,5 +35,9 @@ function initCanvas() {
 	document.body.appendChild(canvas); 
 	canvas.width = screenWidth; 
 	canvas.height = screenHeight;
+}
+
+function initObjects() { 
+
 }
 
