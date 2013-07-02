@@ -19,12 +19,13 @@ function setup(){
 	initListeners(); 
 
 }
+//******* check keyboard input on this example
 
 //---------------------- MAIN GAME LOOP ---------------------------------
 function draw() { 
 
 	ctx.clearRect(0,0,canvas.width, canvas.height); 
-	checkKeys(); 
+	//checkKeys(); 
 	sprite.update(); 
 	
 	// with(sprite) { 
@@ -33,8 +34,14 @@ function draw() {
 	// 	if(pos.y<0) pos.y = screenHeight;  
 	// 	else if(pos.y>screenHeight) pos.y = 0;  
 	// }
-	
+	ctx.save(); 
+	ctx.translate(200,200); 
+	//ctx.rotate(radians(180));
+	ctx.scale(-1,1);
 	sprite.render(ctx); 
+	
+	ctx.restore(); 
+	/ctx.drawImage(spriteImage, 800,0,60,89,0,30,60,89);
 	
 }	
 
@@ -77,7 +84,9 @@ function initObjects() {
 
 	sprite = new Animation(spriteImage, 60, 68, 11); 
 	sprite.play();
+	//sprite.stop();
 	
+	// NOTE TO SELF : implement stop :) ****** 
 }
 
 function initListeners() { 
@@ -85,104 +94,5 @@ function initListeners() {
 	//KeyTracker.addKeyDownListener(Key.SPACE, firePressed); 
 
 }
-
-
-function Sprite() { 
 	
-	var pos = this.pos = new Vector2(100,100); 
-	var vel = this.vel = new Vector2(0,0); 
-	
-	var forwardVel,
-		forwardFriction = 0.97, 
-		steeringStrength = 0.3, 
-		normal = new Vector2(0,0), 
-		newPos = new Vector2(0,0), 
-		wheelRotation = 0,  // -1 to 1
-		easedWheelRotation = 0, 
-		enginePower = 0.6, 
-		steering = false, 
-		rotation = 0; 
-		
-		
-	this.render = function(ctx) { 
-		
-		ctx.save(); 
-		ctx.translate(pos.x, pos.y); 
-		ctx.rotate(radians(rotation)); 
-		ctx.fillStyle = 'white'; 
-		ctx.fillRect(-20, -4, 40, 8); 
-		
-		// front wheels
-		ctx.save(); 
-		ctx.translate(14,0); 
-		// 10 is the magic number - 10 degress max rotation of the wheels
-		ctx.rotate(easedWheelRotation * radians(10)); 		
-		ctx.fillRect(-6,-16, 12, 6); 
-		ctx.fillRect(-6, 10, 12, 6); 
-		
-		ctx.restore(); 
-		
-		// back wheels
-		ctx.save(); 
-		ctx.translate(-14,0);
-		ctx.fillRect(-6,-16, 12, 6); 
-		ctx.fillRect(-6, 10, 12, 6); 
-		ctx.restore(); 
-		ctx.restore(); 
-		
-		
-	}
-	
-	this.accelerate = function (amount) {
-		
-		var force = normal.clone(); 
-		force.multiplyEq(amount * enginePower); 
-		vel.plusEq(force); 
-		
-	} 
-	
-	this.steer = function(amount) { 
-		wheelRotation+=(amount*0.1); 
-		steering = true; 
-	}
-	
-	this.update = function() { 
-		
-		friction = forwardFriction; 
-		forwardVel = vel.dot(normal);
-		forwardVel *= friction; 
-		
-		// speedadjustment makes the steering stickier when you're going fast
-		var speedadjustment = 1 - (Math.min(1,(vel.magnitude()/45)));
-		easedWheelRotation = wheelRotation * speedadjustment;
-		
-		rotation += (easedWheelRotation*forwardVel*steeringStrength);
-		
-		// update normal (unit vector in the direction of the car)
-		normal.reset(1,0); 
-		normal.rotate(rotation); 
-	
-		// velocity = normal * forwardVel
-		
-		vel.copyFrom(normal); 
-		vel.multiplyEq(forwardVel); 
-	
-		pos.plusEq(vel);
-		
-		if(!steering)
-			wheelRotation*=0.4;
-		else
-		{
-			if(wheelRotation>1) wheelRotation = 1; 
-			else if (wheelRotation<-1) wheelRotation = -1; 
-			
-			steering = false; 		
-		}
-	
-		
-	}
-	
-		
-}	
-		
 		
