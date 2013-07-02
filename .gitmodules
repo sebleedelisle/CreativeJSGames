@@ -1,0 +1,3 @@
+[submodule "cjslibs"]
+	path = cjslibs
+	url = git://github.com/sebleedelisle/CreativeJSLibs.git
