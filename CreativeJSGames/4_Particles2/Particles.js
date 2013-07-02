@@ -81,21 +81,20 @@ function Particle(img, x, y) {
 	
 	var pos = this.pos = new Vector2(x,y); 
 	var vel = this.vel = new Vector2(); 
-	this.size = random(5,10); 
+	this.size = random(1,3); 
 	this.drag = 0.98; 
-	this.shrink = 0.92; 
-	this.colour = hsl(200,100,random(50,100)); 
+	this.shrink = 0.96; 
 	this.img = img; 
+	this.gravity = 0.05; 
 	
 	this.update = function() { 
 		vel.multiplyEq(this.drag);
+		vel.y+=this.gravity;
 		pos.plusEq(vel); 
 		this.size*=this.shrink;
 	}
 	
 	this.render = function() { 
-		//ctx.fillStyle = this.colour; 
-		//ctx.fillCircle(pos.x, pos.y, this.size);
 		ctx.save(); 
 		ctx.globalCompositeOperation = 'lighter';
 		ctx.translate(pos.x, pos.y); 
