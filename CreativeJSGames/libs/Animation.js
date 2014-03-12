@@ -46,7 +46,7 @@ function Animation(img, w, h, numFrames) {
 	};
 	
 	this.play = function () {
-		playing = true; 
+		this.playing = true; 
 	};
 	
 	this.render = function(ctx) {
@@ -56,13 +56,13 @@ function Animation(img, w, h, numFrames) {
 		ctx.translate(this.x, this.y); 
 		ctx.scale(this.scaleX, this.scaleY); 
 
-		ctx.drawImage(img, frameOffsetX, 0, this.width, this.height, this.x, this.y, this.width, this.height ); 
+		ctx.drawImage(img, frameOffsetX, 0, this.width, this.height, -this.width/2, 0, this.width, this.height ); 
 		ctx.restore();
 		
 	};
 
-	this.play = function(){
-		this.playing = true; 
+	this.stop = function(){
+		this.playing = false; 
 	};
 	
 }

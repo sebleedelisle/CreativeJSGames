@@ -1,5 +1,4 @@
 var edges = [], 
-	pickUps = [],
 	player; 
 
 var screenWidth, 
@@ -18,120 +17,64 @@ function setup(){
 
 // MAIN GAME LOOP
 // draw automatically called by creative.js
+
 function draw() { 
 	ctx.clearRect(0,0,canvas.width, canvas.height); 
+	
+	drawEdges(); 
+
+	checkKeys(); 	
+	player.update(); 
+
+	checkCollisions(); 
+	
+	player.render(ctx); 
+
+}	
+
+function drawEdges() { 
 	
 	for(var i = 0; i<edges.length; i++){	
 		var edge = edges[i]; 
 		edge.render(ctx); 
 	} 
 	
-	for(var i = 0; i< pickUps.length; i++){	
-		var pickup = pickUps[i]; 
-		
-		if( pickup.enabled ){
-			
-			pickup.render(ctx); 
-		}
-	}
+}
+
+
+function checkKeys() { 
 	
-	player.update(); 
+	if(KeyTracker.isKeyDown(Key.LEFT)) player.moveLeft(); 
+	else if(KeyTracker.isKeyDown(Key.RIGHT)) player.moveRight(); 
+	
+	
+}
+
+
+function checkCollisions(){
 	
 	if(player.pos.x < 0) player.pos.x = 0; 
 	else if(player.getRight()>screenWidth) player.pos.x = screenWidth-player.width; 
 	
 	if(player.pos.y < 0) player.pos.y = 0; 
-	else if(player.getBottom()>screenHeight) player.pos.y = screenHeight; 
-
-	if(KeyTracker.isKeyDown(Key.LEFT)) player.moveLeft(); 
-	else if(KeyTracker.isKeyDown(Key.RIGHT)) player.moveRight(); 
-	
-	
-	checkCollisions(); 
-	
-	player.render(ctx); 
-
-}	
-function checkCollisions(){
-	
-	if(player.connectedEdge){
-		var edge = player.connectedEdge; 
-		if((player.getLeft()>edge.getRight()) || (player.getRight()<edge.getLeft()))
-			player.fall();
-
-	}
-	
-	
-	for (var i= 0; i<edges.length; i++){
-		var edge = edges[i]; 
-		
-		if((player.pos.y > edge.getTop()) && (player.pos.y - player.vel.y < edge.getTop())) {
-			if((player.getLeft() < edge.getRight()) && (player.getRight()> edge.getLeft())) {
-				player.connectedEdge = edge; 
-				player.pos.y = edge.pos.y; 
-				player.vel.y = 0; 	
-			}
-		}	
-		
-	}
-	
-	
-	for (var i= 0; i< pickUps.length; i++){
-	
-		var pickup = pickUps[i];
-		
-		if( checkHorizCollision( player , pickup ) ){
-			if( checkVertCollision( player, pickup ) ){
-				if( pickup.enabled ){
-					pickupsCollected++;
-					
-				}
-					
-				pickup.collect() ;
-			}
-		}
-	}
+	else if(player.getBottom()>screenHeight) player.pos.y = screenHeight;
 	
 }
-	
-	
-	
-function checkVertCollision( obj1 , obj2 ){
-
-	if(((obj1.pos.y > obj2.getTop()) && (obj1.pos.y <= obj2.pos.y) ) || (( obj1.getTop() < obj2.pos.y) && ( obj1.getTop() > obj2.getTop() ))) return true ;
-	return false ;
-}
-
-function checkHorizCollision( obj1 , obj2 ){
-
-	if((obj1.getLeft() < obj2.getRight()) && (obj1.getRight()> obj2.getLeft())) return true ;
-	return false ;
-
-}
-	
-
 
 function initObjects() { 
 	
 	// bottom edge
 	edges.push(new Edge(0,screenHeight-1, screenWidth)); 
-	
 	edges.push(new Edge( 10, 415, 190 )); 
 	edges.push(new Edge( 10, 244, 190 ));
 	edges.push(new Edge( 238, 328, 190 ));
 	edges.push(new Edge( 297, 153, 190 ));
 	edges.push(new Edge( 196, 64, 190 ));
 	edges.push(new Edge( 560, 200, 168 ));
-	edges.push(new Edge( 505, 40, 120 ));		
-	
+	edges.push(new Edge( 505, 40, 120 ));
+
 	player = new Player(20,50); 
 	
-	// PICKUPS
-	for( var i = 0 ; i < edges.length ; i ++ ){
-			var pickup = new PickUp( random( edges[i].getLeft() + edges[i].width / 4 , edges[i].getRight() -  edges[i].width / 4 ) ,  edges[i].getTop() ) ;
-			pickUps.push( pickup ) ;		
-	}
-
 }
 
 function initListeners() { 
@@ -146,8 +89,7 @@ function initVars() {
 	screenWidth = 800; 
 	screenHeight = 480; 
 	frameRate = 40;
-	pickupsCollected = 0;
-	totalPickups = pickUps.length;
+
 	
 }
 
@@ -212,16 +154,11 @@ function Player(x, y) {
 	};
 	
 	this.jump = function() {
-			
-		if(this.connectedEdge) {
-			vel.y -= 30; 
-			this.connectedEdge = null; 
-		}
-
+		vel.y = -30; 
+	
 	};
 	
 	this.fall = function(){
-		this.connectedEdge = null;
 	};
 	
 
@@ -281,50 +218,5 @@ function Edge(x, y, w)
 		
 		
 	};
-
-}
-
-//-------------- PICKUP ----------------
-
-function PickUp(x, y) {
-
-	var pos = this.pos = new Vector2(x,y); 
-	this.width = 25; 
-	this.height = 27; 
-	this.enabled = true ;
-	
-	this.render = function(c){
-		c.save(); 
-		c.fillStyle = "blue"; 
-		c.fillRect(this.getLeft(), this.getTop(), this.width, this.height); 
-		c.restore();
-	};
-	
-	this.collect = function(){
-		this.enabled = false ;
-	};
-	
-	
-	this.getLeft = function() { 
-		return pos.x; 
-	};
-	
-	this.getRight = function() { 
-		
-		return pos.x+this.width; 
-		
-	};
-
-	this.getTop = function() {
-		return pos.y-this.height; 
-		
-	};
-	
-	this.getBottom = function () {
-		
-		return pos.y; 
-		
-	};
-
 
 }

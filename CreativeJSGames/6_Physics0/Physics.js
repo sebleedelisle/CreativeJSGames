@@ -34,10 +34,9 @@ function draw() {
 	if(KeyTracker.isKeyDown(Key.UP)) player.moveUp(); 
 	else if(KeyTracker.isKeyDown(Key.DOWN)) player.moveDown(); 
 	else player.vel.y = 0; 
-	
-	
-	player.render(ctx); 
 
+	player.render(ctx); 
+	
 }	
 	
 
@@ -83,6 +82,8 @@ function Player(x, y) {
 	
 	this.width = 24; 
 	this.height = 43; 
+		
+	var moveSpeed = 12; 
 		
 	this.update = function (){
 	

@@ -51,7 +51,8 @@ function draw() {
 		renderAsteroids(); 
 		renderBullets(); 
 		
-	} else { 
+	} else { 		
+		updateBullets();
 		updateAsteroids(); 
 		renderAsteroids(); 
 	}
@@ -69,11 +70,15 @@ function draw() {
 	
 	// now do all the messaging
 	ctx.fillStyle = 'white';
+	ctx.textAlign = 'left';
 	ctx.fillText("lives = "+lives, 10,20);
 	
-	if(gameState == STATE_GAME_OVER) { 
+	ctx.textAlign = 'center';
+	if(gameState == STATE_WAITING) { 
+		ctx.fillText("HIT FIRE TO START", screenWidth/2, screenHeight/2); 
+	} else if(gameState == STATE_GAME_OVER) { 
 		ctx.fillText("GAME OVER", screenWidth/2, screenHeight/2); 
-	}
+	} 
 	
 	framesSinceStateChange++; 
 	

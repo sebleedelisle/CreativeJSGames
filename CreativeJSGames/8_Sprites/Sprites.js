@@ -32,13 +32,9 @@ function draw() {
 	else if(sprite.x>screenWidth) sprite.x = 0;  
 	if(sprite.y<0) sprite.y = screenHeight;  
 	else if(sprite.y>screenHeight) sprite.y = 0;  
-
 	
-	// ctx.scale(-1,1);
 	sprite.render(ctx); 
-	
-	//ctx.drawImage(spriteImage, 0,0);
-//	console.log('hello?');
+
 	
 }	
 
