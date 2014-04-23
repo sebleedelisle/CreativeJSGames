@@ -64,7 +64,7 @@ function Animation(img, w, h, domElem) {
 		var dom = this.domElement; 	
 		var offset = this.currentFrame * this.width; 
 	
-		if(dom.style.background!='url('+img.src+')') dom.style.background = 'url('+img.src+')'; 
+		dom.style.background = 'url('+img.src+')'; 
 		dom.style.width = this.width+"px"; 
 		dom.style.height = this.height+"px";
 		
