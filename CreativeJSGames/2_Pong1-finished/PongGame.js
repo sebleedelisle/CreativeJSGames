@@ -54,7 +54,7 @@ function checkCollisions() {
 		if((ball.getLeft()< playerPaddle.getRight())  && (ball.getLeft() - ball.vel.x >= playerPaddle.getRight()) ){  
 			// ball has crossed over the threshold of the edge of the bat so now check verticals
 			
-			if(!((ball.getBottom() < playerPaddle.getTop()) || (ball.getTop() > playerPaddle.getBottom()))){
+			if((ball.getBottom()> playerPaddle.getTop()) && (ball.getTop() < playerPaddle.getBottom())){
 				// ball has hit paddle! 
 				ball.x = playerPaddle.getRight(); 
 				ball.vel.x*=-1; 
@@ -70,7 +70,7 @@ function checkCollisions() {
 		if((ball.getRight()> aiPaddle.getLeft()) && (ball.getRight()-ball.vel.x <= aiPaddle.getLeft())) { 
 			
 			// ball has crossed over the threshold of the edge of the bat so now check verticals
-			if(!((ball.getBottom() < aiPaddle.getTop()) || (ball.getTop() > aiPaddle.getBottom()))){
+			if((ball.getBottom() > aiPaddle.getTop()) && (ball.getTop() < aiPaddle.getBottom())){
 				// ball has hit paddle! 
 				ball.x = aiPaddle.getLeft(); 
 				ball.vel.x*=-1; 
